@@ -29,30 +29,30 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        viewModel.output.currentAnswerString
+        viewModel.outputs.currentAnswerString
             .observeOn(MainScheduler.asyncInstance) //警告にあったので追加。
             .filter { $0.count >= targetNumberLength }
             .subscribe(onNext: { [weak self] _ in
                 print("8文字")
-                self?.viewModel.input.answerButtonDidTap()
+                self?.viewModel.inputs.answerButtonDidTap()
             }).disposed(by: bag)
         
-        viewModel.output
+        viewModel.outputs
             .currentAnswerString
             .bind(to: label.rx.text)
             .disposed(by: bag)
         
-        viewModel.output
+        viewModel.outputs
             .nextTargetString
             .bind(to: showTargetNumberForWhile)
             .disposed(by: bag)
         
-        viewModel.output
+        viewModel.outputs
             .result
             .bind(to: showResultThenRequest)
             .disposed(by: bag)
         
-        viewModel.output
+        viewModel.outputs
             .tapEnabled
             .bind(to: baseView.rx.isActive)
             .disposed(by: bag)
@@ -60,16 +60,16 @@ class ViewController: UIViewController {
         
         numberButtons.forEach { button in
             button.rx.tap.subscribe(onNext: { [weak self] _ in
-                self?.viewModel.input.numButtonDidTap(num: button.tag)
+                self?.viewModel.inputs.numButtonDidTap(num: button.tag)
             }).disposed(by: bag)
         }
         
         answerButton.rx.tap.subscribe(onNext: { [weak self] _ in
-            self?.viewModel.input.answerButtonDidTap()
+            self?.viewModel.inputs.answerButtonDidTap()
         }).disposed(by: bag)
         
         clearButton.rx.tap.subscribe(onNext: { [weak self] _ in
-            self?.viewModel.input.clearButtonDidTap()
+            self?.viewModel.inputs.clearButtonDidTap()
         }).disposed(by: bag)
         
         

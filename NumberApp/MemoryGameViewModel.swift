@@ -12,14 +12,14 @@ enum MemoryGameState {
     case gudgeResult //答え合わせをする。
 }
 
-protocol MemoryGameViewModelInput {
+protocol MemoryGameViewModelInputs {
     func numButtonDidTap(num: Int)
     func answerButtonDidTap()
     func clearButtonDidTap()
     func updateState(to: MemoryGameState)
 }
 
-protocol MemoryGameViewModelOutput {
+protocol MemoryGameViewModelOutputs {
     var nextTargetString: Observable<String> { get set }
     var currentAnswerString: Observable<String> { get set }
     var result: Observable<GudgeResult> { get }
@@ -27,8 +27,8 @@ protocol MemoryGameViewModelOutput {
 }
 
 protocol MemoryGameViewModelType {
-    var input: MemoryGameViewModelInput { get }
-    var output: MemoryGameViewModelOutput { get }
+    var inputs: MemoryGameViewModelInputs { get }
+    var outputs: MemoryGameViewModelOutputs { get }
 }
 
 let questionLength = 5
@@ -52,12 +52,12 @@ struct GameManager {
     }
 }
 
-class MemoryGameViewModel: MemoryGameViewModelType, MemoryGameViewModelInput, MemoryGameViewModelOutput {
+final class MemoryGameViewModel: MemoryGameViewModelType, MemoryGameViewModelInputs, MemoryGameViewModelOutputs {
     
-    var input: MemoryGameViewModelInput { return self }
-    var output: MemoryGameViewModelOutput { return self }
+    var inputs: MemoryGameViewModelInputs { return self }
+    var outputs: MemoryGameViewModelOutputs { return self }
     
-    //Input
+    //Inputs
     func numButtonDidTap(num: Int) {
         _currentAnswerString.accept(_currentAnswerString.value + "\(num)")
     }
@@ -105,7 +105,7 @@ class MemoryGameViewModel: MemoryGameViewModelType, MemoryGameViewModelInput, Me
         }
     }
     
-    //Output
+    //Outputs
     var nextTargetString: Observable<String>
     var currentAnswerString: Observable<String>
     var result: Observable<GudgeResult>

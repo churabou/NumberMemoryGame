@@ -15,6 +15,7 @@
 		C95F2E2020CA18F400D9AA28 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = C95F2E1E20CA18F400D9AA28 /* LaunchScreen.storyboard */; };
 		C95F2E2B20CA18F400D9AA28 /* NumberAppTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C95F2E2A20CA18F400D9AA28 /* NumberAppTests.swift */; };
 		C95F2E3620CA18F400D9AA28 /* NumberAppUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C95F2E3520CA18F400D9AA28 /* NumberAppUITests.swift */; };
+		C978F0C320CC3DFB004397E3 /* BaseView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C978F0C220CC3DFB004397E3 /* BaseView.swift */; };
 		C9812E1820CAA30600318525 /* Layout.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9812E1720CAA30600318525 /* Layout.swift */; };
 		C9812E1A20CAACDD00318525 /* MemoryGameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9812E1920CAACDD00318525 /* MemoryGameView.swift */; };
 		C9812E1C20CB5BD500318525 /* MemoryGameViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9812E1B20CB5BD500318525 /* MemoryGameViewModel.swift */; };
@@ -54,6 +55,7 @@
 		C95F2E3120CA18F400D9AA28 /* NumberAppUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = NumberAppUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		C95F2E3520CA18F400D9AA28 /* NumberAppUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NumberAppUITests.swift; sourceTree = "<group>"; };
 		C95F2E3720CA18F400D9AA28 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		C978F0C220CC3DFB004397E3 /* BaseView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseView.swift; sourceTree = "<group>"; };
 		C9812E1720CAA30600318525 /* Layout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Layout.swift; sourceTree = "<group>"; };
 		C9812E1920CAACDD00318525 /* MemoryGameView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryGameView.swift; sourceTree = "<group>"; };
 		C9812E1B20CB5BD500318525 /* MemoryGameViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryGameViewModel.swift; sourceTree = "<group>"; };
@@ -129,6 +131,7 @@
 			children = (
 				C95F2E1520CA18F100D9AA28 /* AppDelegate.swift */,
 				C95F2E1720CA18F100D9AA28 /* ViewController.swift */,
+				C978F0C220CC3DFB004397E3 /* BaseView.swift */,
 				C9812E1B20CB5BD500318525 /* MemoryGameViewModel.swift */,
 				C9812E1920CAACDD00318525 /* MemoryGameView.swift */,
 				C9812E1720CAA30600318525 /* Layout.swift */,
@@ -335,6 +338,7 @@
 				C95F2E1820CA18F100D9AA28 /* ViewController.swift in Sources */,
 				C9812E1820CAA30600318525 /* Layout.swift in Sources */,
 				C9812E1C20CB5BD500318525 /* MemoryGameViewModel.swift in Sources */,
+				C978F0C320CC3DFB004397E3 /* BaseView.swift in Sources */,
 				C95F2E1620CA18F100D9AA28 /* AppDelegate.swift in Sources */,
 				C9812E1A20CAACDD00318525 /* MemoryGameView.swift in Sources */,
 			);
