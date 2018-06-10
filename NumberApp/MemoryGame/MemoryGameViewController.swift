@@ -78,7 +78,7 @@ class MemoryGameViewController: UIViewController {
             Observable<Int>.interval(1.0, scheduler: MainScheduler.instance)
                 .take(1)
                 .subscribe(onNext: { _ in
-                    self.viewModel.updateState(to: .trySolving)
+                    self.viewModel.inputs.updateState(to: .trySolving)
                 }).disposed(by: self.bag)
             
         }.asObserver()
@@ -97,7 +97,7 @@ class MemoryGameViewController: UIViewController {
             Observable<Int>.interval(1.0, scheduler: MainScheduler.instance)
                 .take(1)
                 .subscribe(onNext: { [weak self] _ in
-                    self?.viewModel.updateState(to: .showTarget)
+                    self?.viewModel.inputs.updateState(to: .showTarget)
                 }).disposed(by: self.bag)
             }.asObserver()
     }

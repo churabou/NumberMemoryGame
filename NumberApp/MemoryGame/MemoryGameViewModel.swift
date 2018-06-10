@@ -21,8 +21,8 @@ protocol MemoryGameViewModelInputs {
 }
 
 protocol MemoryGameViewModelOutputs {
-    var targetString: Observable<String> { get set }
-    var inAnswerString: Observable<String> { get set }
+    var targetString: Observable<String> { get }
+    var inAnswerString: Observable<String> { get }
     var result: Observable<GudgeResult> { get }
     var tapEnabled: Observable<Bool> { get }
     var gameFinished: Observable<Void> { get }
