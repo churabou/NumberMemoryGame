@@ -21,7 +21,7 @@ extension UIColor {
 final class MemoryGameView: BaseView {
     
     private (set) var label = UILabel()
-    private (set) var answerButton = UIButton()
+    private (set) var passButton = UIButton()
     private (set) var clearButton = UIButton()
     private (set) var numberButtons: [UIButton] = []
     
@@ -60,8 +60,8 @@ final class MemoryGameView: BaseView {
                     b.setTitle("clear", for: .normal)
                     clearButton = b
                 } else if num == 12 {
-                    b.setTitle("ok", for: .normal)
-                    answerButton = b
+                    b.setTitle("pass", for: .normal)
+                    passButton = b
                 } else {
                     let num = num == 11 ? 0 : num
                     b.tag = num
@@ -92,7 +92,7 @@ final class MemoryGameView: BaseView {
         isUserInteractionEnabled = active
         let alpha: CGFloat = active ? 1 : 0.3
         numberButtons.forEach { $0.alpha = alpha }
-        answerButton.alpha = alpha
+        passButton.alpha = alpha
         clearButton.alpha = alpha
     }
 }

@@ -16,7 +16,7 @@ class MemoryGameViewController: UIViewController {
     private let baseView = MemoryGameView()
     private var label: UILabel { return baseView.label }
     private var numberButtons: [UIButton] { return baseView.numberButtons }
-    private var answerButton: UIButton { return baseView.answerButton }
+    private var passButton: UIButton { return baseView.passButton }
     private var clearButton: UIButton { return baseView.clearButton }
     
     override func loadView() {
@@ -29,21 +29,13 @@ class MemoryGameViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        viewModel.outputs.currentAnswerString
-            .observeOn(MainScheduler.asyncInstance) //警告にあったので追加。
-            .filter { $0.count >= targetNumberLength }
-            .subscribe(onNext: { [weak self] _ in
-                print("8文字")
-                self?.viewModel.inputs.updateState(to: .gudgeResult)
-            }).disposed(by: bag)
-        
         viewModel.outputs
-            .currentAnswerString
+            .inAnswerString
             .bind(to: label.rx.text)
             .disposed(by: bag)
         
         viewModel.outputs
-            .nextTargetString
+            .targetString
             .bind(to: showTargetNumberForWhile)
             .disposed(by: bag)
         
@@ -68,8 +60,8 @@ class MemoryGameViewController: UIViewController {
             }).disposed(by: bag)
         }
         
-        answerButton.rx.tap.subscribe(onNext: { [weak self] _ in
-            self?.viewModel.inputs.skipButtonTapped()
+        passButton.rx.tap.subscribe(onNext: { [weak self] _ in
+            self?.viewModel.inputs.passButtonTapped()
         }).disposed(by: bag)
         
         clearButton.rx.tap.subscribe(onNext: { [weak self] _ in
@@ -92,7 +84,7 @@ class MemoryGameViewController: UIViewController {
         }.asObserver()
     }
     
-    //正解ならCorrect、不正解なら間違ったところをハイライトして表示する。
+    //正解ならCorrect、不正解なら間違ったところをハイライトして表示する。1秒後に次の問題を表示する
     private var showResultThenRequest: AnyObserver<GudgeResult> {
         return Binder(self) { `self`, result in
             switch result {
@@ -103,13 +95,13 @@ class MemoryGameViewController: UIViewController {
             }
             //1秒後に処理をしたい。
             Observable<Int>.interval(1.0, scheduler: MainScheduler.instance)
-                .debug("interval")
                 .take(1)
                 .subscribe(onNext: { [weak self] _ in
                     self?.viewModel.updateState(to: .showTarget)
                 }).disposed(by: self.bag)
-        }.asObserver()
+            }.asObserver()
     }
+
 }
 
 extension MemoryGameViewController {
