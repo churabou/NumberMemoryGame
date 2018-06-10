@@ -17,6 +17,7 @@ protocol MemoryGameViewModelInputs {
     func skipButtonTapped()
     func clearButtonTapped()
     func updateState(to: MemoryGameState)
+    func viewDidLoad()
 }
 
 protocol MemoryGameViewModelOutputs {
@@ -46,7 +47,7 @@ final class MemoryGameViewModel: MemoryGameViewModelType, MemoryGameViewModelInp
         //判定
         tapEnableSubject.onNext(false)
         resultSubject.onNext(.incorrect(NSAttributedString(string: "pass")))
-        GameManager.results.append((target: _currentAnswerString.value, answer: "pass"))
+        GameManager.current.results.append((target: _currentAnswerString.value, answer: "pass"))
     }
     
     func clearButtonTapped() {
@@ -82,9 +83,15 @@ final class MemoryGameViewModel: MemoryGameViewModelType, MemoryGameViewModelInp
                 let attrText: NSAttributedString = .hilightTwoStringDiff(_currentAnswerString.value, with: _nextTargetString.value)
                 resultSubject.onNext(.incorrect(attrText))
             }
-             GameManager.results.append((target: _nextTargetString.value, answer: _currentAnswerString.value))
+             GameManager.current.results.append((target: _nextTargetString.value, answer: _currentAnswerString.value))
             //結果を保存。
         }
+    }
+    
+    func viewDidLoad() {
+        GameManager.startNewGame()
+        targetStrings = GameManager.current.newTargets
+        updateState(to: .showTarget)
     }
     
     //Outputs
@@ -95,8 +102,6 @@ final class MemoryGameViewModel: MemoryGameViewModelType, MemoryGameViewModelInp
     var gameFinished: Observable<Void>
     
     init() {
-        targetStrings = GameManager.newTargets
-        
         nextTargetString = _nextTargetString.asObservable()
         currentAnswerString = _currentAnswerString.asObservable().share(replay: 1)
         result = resultSubject.asObservable()
@@ -110,7 +115,7 @@ final class MemoryGameViewModel: MemoryGameViewModelType, MemoryGameViewModelInp
     private var tapEnableSubject: PublishSubject<Bool> = PublishSubject()
     private var gameFinishTriger: PublishSubject<Void> = PublishSubject()
     private var bag = DisposeBag()
-    private var targetStrings: [String]
+    private var targetStrings: [String] = []
 }
 
 //⚠️ Reentrancy anomaly was detected.

@@ -42,12 +42,12 @@ class GameResultViewController: UIViewController {
 extension GameResultViewController: UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return GameManager.results.count
+        return GameManager.current.results.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath) as! GameResultTableViewCell
-        cell.configure(result: GameManager.results[indexPath.row])
+        cell.configure(result: GameManager.current.results[indexPath.row])
         return cell
     }
 }

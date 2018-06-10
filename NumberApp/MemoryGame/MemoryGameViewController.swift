@@ -76,7 +76,7 @@ class MemoryGameViewController: UIViewController {
             self?.viewModel.inputs.clearButtonTapped()
         }).disposed(by: bag)
         
-        viewModel.inputs.updateState(to: .showTarget)
+        viewModel.inputs.viewDidLoad()
     }
     
     private var showTargetNumberForWhile: AnyObserver<String> {
