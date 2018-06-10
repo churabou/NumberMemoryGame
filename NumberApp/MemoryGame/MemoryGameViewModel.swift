@@ -3,7 +3,7 @@ import RxCocoa
 
 enum GudgeResult {
     case currect
-    case incorrect(String)
+    case incorrect(NSAttributedString)
 }
 
 enum MemoryGameState {
@@ -13,9 +13,9 @@ enum MemoryGameState {
 }
 
 protocol MemoryGameViewModelInputs {
-    func numButtonDidTap(num: Int)
-    func answerButtonDidTap()
-    func clearButtonDidTap()
+    func numberTapped(num: Int)
+    func skipButtonTapped()
+    func clearButtonTapped()
     func updateState(to: MemoryGameState)
 }
 
@@ -24,32 +24,12 @@ protocol MemoryGameViewModelOutputs {
     var currentAnswerString: Observable<String> { get set }
     var result: Observable<GudgeResult> { get }
     var tapEnabled: Observable<Bool> { get }
+    var gameFinished: Observable<Void> { get }
 }
 
 protocol MemoryGameViewModelType {
     var inputs: MemoryGameViewModelInputs { get }
     var outputs: MemoryGameViewModelOutputs { get }
-}
-
-let questionLength = 5
-let targetNumberLength = 8
-
-struct GameManager {
-    
-    static let questionLength = 5 //問題数
-    static let targetNumberLength = 8 //問題の桁数
-    
-    static var newTargets: [String] {
-        
-//        let createRandomNumber: ((Swift.Void) -> String) = { _ in
-//            return (0..<targetNumberLength).map { _ in "\(arc4random_uniform(10))" }.joined()
-//        }
-        return (0..<questionLength).map { _ in createRandomNumber() }
-    }
-    
-    static func createRandomNumber() -> String {
-        return (0..<targetNumberLength).map { _ in "\(arc4random_uniform(10))" }.joined()
-    }
 }
 
 final class MemoryGameViewModel: MemoryGameViewModelType, MemoryGameViewModelInputs, MemoryGameViewModelOutputs {
@@ -58,21 +38,18 @@ final class MemoryGameViewModel: MemoryGameViewModelType, MemoryGameViewModelInp
     var outputs: MemoryGameViewModelOutputs { return self }
     
     //Inputs
-    func numButtonDidTap(num: Int) {
+    func numberTapped(num: Int) {
         _currentAnswerString.accept(_currentAnswerString.value + "\(num)")
     }
     
-    func answerButtonDidTap() {
+    func skipButtonTapped() {
         //判定
         tapEnableSubject.onNext(false)
-        if _currentAnswerString.value == _nextTargetString.value {
-            resultSubject.onNext(.currect)
-        } else {
-            resultSubject.onNext(.incorrect("aaaa"))
-        }
+        resultSubject.onNext(.incorrect(NSAttributedString(string: "pass")))
+        GameManager.results.append((target: _currentAnswerString.value, answer: "pass"))
     }
     
-    func clearButtonDidTap() {
+    func clearButtonTapped() {
         let answer = _currentAnswerString.value
         if !answer.isEmpty {
             _currentAnswerString.accept(String(answer.prefix(answer.count-1)))
@@ -89,6 +66,7 @@ final class MemoryGameViewModel: MemoryGameViewModelType, MemoryGameViewModelInp
             } else {
                 //ゲーム終了
                 print("game over")
+                gameFinishTriger.onNext(())
             }
         case .trySolving:
             tapEnableSubject.onNext(true)
@@ -99,8 +77,12 @@ final class MemoryGameViewModel: MemoryGameViewModelType, MemoryGameViewModelInp
             if _currentAnswerString.value == _nextTargetString.value {
                 resultSubject.onNext(.currect)
             } else {
-                resultSubject.onNext(.incorrect("aaaa"))
+                
+                //入力された数字と問題の数字の違っている部分がハイライトされた文字列。
+                let attrText = hilightTowStringDiff(_currentAnswerString.value, with: _nextTargetString.value)
+                resultSubject.onNext(.incorrect(attrText))
             }
+             GameManager.results.append((target: _nextTargetString.value, answer: _currentAnswerString.value))
             //結果を保存。
         }
     }
@@ -110,23 +92,41 @@ final class MemoryGameViewModel: MemoryGameViewModelType, MemoryGameViewModelInp
     var currentAnswerString: Observable<String>
     var result: Observable<GudgeResult>
     var tapEnabled: Observable<Bool>
+    var gameFinished: Observable<Void>
     
     init() {
+        targetStrings = GameManager.newTargets
+        
         nextTargetString = _nextTargetString.asObservable()
         currentAnswerString = _currentAnswerString.asObservable().share(replay: 1)
         result = resultSubject.asObservable()
-        tapEnabled = tapEnableSubject.asObserver()
-        
-        targetStrings = GameManager.newTargets
+        tapEnabled = tapEnableSubject.asObservable()
+        gameFinished = gameFinishTriger.asObservable()
     }
     
     private var _nextTargetString: BehaviorRelay<String> = BehaviorRelay(value: "")
     private var _currentAnswerString: BehaviorRelay<String> = BehaviorRelay(value: "")
     private var resultSubject: PublishSubject<GudgeResult> = PublishSubject()
     private var tapEnableSubject: PublishSubject<Bool> = PublishSubject()
+    private var gameFinishTriger: PublishSubject<Void> = PublishSubject()
     private var bag = DisposeBag()
-    
     private var targetStrings: [String]
+    
+    
+    //二つの文字列の差分をハイライトしたAttributedString
+    private func hilightTowStringDiff(_ target: String, with: String) -> NSAttributedString {
+
+        let lhd = target.map { String($0) }
+        let rhd = with.map { String($0) }
+        let attrText = NSMutableAttributedString(string: target)
+//        if answer.count != target.count { return } //起きる可能性はない。
+        for i in 0..<lhd.count {
+            if lhd[i] != rhd[i] {
+                attrText.addAttribute(.foregroundColor, value: UIColor.pink, range: NSMakeRange(i, 1))
+            }
+        }
+        return attrText
+    }
 }
 
 //⚠️ Reentrancy anomaly was detected.

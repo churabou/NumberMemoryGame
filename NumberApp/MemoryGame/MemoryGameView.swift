@@ -8,6 +8,16 @@
 
 import UIKit
 
+extension UIColor {
+    static var pink: UIColor {
+        return UIColor(displayP3Red: 255/255, green: 192/255, blue: 203/255, alpha: 1.0)
+    }
+    
+    static var lightBlue: UIColor {
+        return UIColor.cyan.withAlphaComponent(0.9)
+    }
+}
+
 final class MemoryGameView: BaseView {
     
     
@@ -20,8 +30,9 @@ final class MemoryGameView: BaseView {
         
         backgroundColor = .white
         
-        label.backgroundColor = .black
-        label.textColor = .white
+        label.backgroundColor = .white
+        label.textColor = .lightGray
+        label.font = .boldSystemFont(ofSize: 24)
         label.textAlignment = .center
         addSubview(label)
         
@@ -41,8 +52,9 @@ final class MemoryGameView: BaseView {
             (row*3+1...row*3+3).forEach { num in
                 let b = UIButton()
                 b.layer.cornerRadius = buttonS / 2
-                b.backgroundColor = row % 2 == 0 ? .red : .blue
-                b.setTitleColor(.white, for: .normal)
+                b.setTitleColor(.cyan, for: .normal)
+                b.layer.borderWidth = 2
+                b.layer.borderColor = UIColor.cyan.cgColor
                 
                 if num == 10 {
                     b.setTitle("clear", for: .normal)
@@ -68,7 +80,7 @@ final class MemoryGameView: BaseView {
     func update(active: Bool) {
         
         isUserInteractionEnabled = active
-        let alpha: CGFloat = active ? 1 : 0.5
+        let alpha: CGFloat = active ? 1 : 0
         numberButtons.forEach { $0.alpha = alpha }
         answerButton.alpha = alpha
         clearButton.alpha = alpha

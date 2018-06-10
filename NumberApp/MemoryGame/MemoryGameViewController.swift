@@ -10,10 +10,9 @@ import UIKit
 import RxSwift
 import RxCocoa
 
-class ViewController: UIViewController {
+class MemoryGameViewController: UIViewController {
 
-    
-    private let bag = DisposeBag()
+    //View
     private let baseView = MemoryGameView()
     private var label: UILabel { return baseView.label }
     private var numberButtons: [UIButton] { return baseView.numberButtons }
@@ -24,7 +23,8 @@ class ViewController: UIViewController {
         self.view = baseView
     }
     
-    let viewModel: MemoryGameViewModel = MemoryGameViewModel()
+    private let bag = DisposeBag()
+    private let viewModel: MemoryGameViewModel = MemoryGameViewModel()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -34,7 +34,7 @@ class ViewController: UIViewController {
             .filter { $0.count >= targetNumberLength }
             .subscribe(onNext: { [weak self] _ in
                 print("8文字")
-                self?.viewModel.inputs.answerButtonDidTap()
+                self?.viewModel.inputs.updateState(to: .gudgeResult)
             }).disposed(by: bag)
         
         viewModel.outputs
@@ -57,25 +57,29 @@ class ViewController: UIViewController {
             .bind(to: baseView.rx.isActive)
             .disposed(by: bag)
         
+        viewModel.outputs
+            .gameFinished
+            .bind(to: showGameResultVC)
+            .disposed(by: bag)
         
         numberButtons.forEach { button in
             button.rx.tap.subscribe(onNext: { [weak self] _ in
-                self?.viewModel.inputs.numButtonDidTap(num: button.tag)
+                self?.viewModel.inputs.numberTapped(num: button.tag)
             }).disposed(by: bag)
         }
         
         answerButton.rx.tap.subscribe(onNext: { [weak self] _ in
-            self?.viewModel.inputs.answerButtonDidTap()
+            self?.viewModel.inputs.skipButtonTapped()
         }).disposed(by: bag)
         
         clearButton.rx.tap.subscribe(onNext: { [weak self] _ in
-            self?.viewModel.inputs.clearButtonDidTap()
+            self?.viewModel.inputs.clearButtonTapped()
         }).disposed(by: bag)
         
-        
+        viewModel.inputs.updateState(to: .showTarget)
     }
     
-    var showTargetNumberForWhile: AnyObserver<String> {
+    private var showTargetNumberForWhile: AnyObserver<String> {
         return Binder(self) { `self`, target in
             self.label.text = target
             //1秒後に処理をしたい。
@@ -89,23 +93,31 @@ class ViewController: UIViewController {
     }
     
     //正解ならCorrect、不正解なら間違ったところをハイライトして表示する。
-    var showResultThenRequest: AnyObserver<GudgeResult> {
+    private var showResultThenRequest: AnyObserver<GudgeResult> {
         return Binder(self) { `self`, result in
             switch result {
             case .currect: //表示非表示、をして
-                self.label.backgroundColor = .blue
-            case .incorrect(_):
-                self.label.backgroundColor = .red
+                self.label.text = "correct"
+            case .incorrect(let hilightedText):
+                self.label.attributedText = hilightedText
             }
             //1秒後に処理をしたい。
             Observable<Int>.interval(1.0, scheduler: MainScheduler.instance)
                 .debug("interval")
                 .take(1)
                 .subscribe(onNext: { [weak self] _ in
-                    self?.label.backgroundColor = .black
-//                    self?.viewModel.input.requestNext()
                     self?.viewModel.updateState(to: .showTarget)
                 }).disposed(by: self.bag)
+        }.asObserver()
+    }
+}
+
+extension MemoryGameViewController {
+    
+    private var showGameResultVC: AnyObserver<Void> {
+        return Binder(self) { controller, _ in
+            let c = GameResultViewController()
+            controller.present(c, animated: true, completion: nil)
         }.asObserver()
     }
 }
