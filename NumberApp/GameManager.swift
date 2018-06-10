@@ -3,7 +3,7 @@ import Foundation
 struct GameManager {
     
     typealias Result = (target: String, answer: String)
-    static var current: GameManager = GameManager()
+    static var current = GameManager()
     private init() {}
     
     static func startNewGame() {

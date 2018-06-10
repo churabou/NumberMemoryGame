@@ -51,6 +51,7 @@ final class MemoryGameView: BaseView {
             
             (row*3+1...row*3+3).forEach { num in
                 let b = UIButton()
+                b.addTarget(self, action: #selector(actionAnimation), for: .touchUpInside)
                 b.layer.cornerRadius = buttonS / 2
                 b.setTitleColor(.cyan, for: .normal)
                 b.layer.borderWidth = 2
@@ -95,5 +96,20 @@ final class MemoryGameView: BaseView {
         passButton.alpha = alpha
         clearButton.alpha = alpha
     }
+    
+    @objc private func actionAnimation(_ sender: UIButton) {
+        CATransaction.begin()
+        
+        CATransaction.setCompletionBlock {
+            sender.layer.removeAnimation(forKey: "KEY_COLOR_ANIMATION")
+        }
+        
+        let anim = CABasicAnimation(keyPath: "backgroundColor")
+        anim.fromValue = UIColor.lightBlue.cgColor
+        anim.toValue = UIColor.clear.cgColor
+        anim.duration = 0.2
+        sender.layer.add(anim, forKey: "KEY_COLOR_ANIMATION")
+        
+        CATransaction.commit()
+    }
 }
-
