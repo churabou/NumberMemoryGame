@@ -24,4 +24,8 @@ struct GameManager {
     
     static var results: [Result] = []
     
+    static func startNewGame() {
+        
+    }
+    
 }

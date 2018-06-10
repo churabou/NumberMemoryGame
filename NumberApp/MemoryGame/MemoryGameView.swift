@@ -20,11 +20,13 @@ extension UIColor {
 
 final class MemoryGameView: BaseView {
     
-    
     private (set) var label = UILabel()
     private (set) var answerButton = UIButton()
     private (set) var clearButton = UIButton()
     private (set) var numberButtons: [UIButton] = []
+    
+    private var stackView = UIStackView()
+    private let buttonS: CGFloat = 80
     
     override func initializeView() {
         
@@ -32,12 +34,10 @@ final class MemoryGameView: BaseView {
         
         label.backgroundColor = .white
         label.textColor = .lightGray
-        label.font = .boldSystemFont(ofSize: 24)
+        label.font = .boldSystemFont(ofSize: 30)
         label.textAlignment = .center
         addSubview(label)
         
-        let buttonS: CGFloat = 80
-        let stackView = UIStackView()
         stackView.axis = .vertical
         stackView.distribution = .fillEqually
         stackView.spacing = 10
@@ -73,14 +73,24 @@ final class MemoryGameView: BaseView {
             stackView.addArrangedSubview(wrapperView)
         }
         addSubview(stackView)
-        stackView.chura.layout.width(buttonS*3+20).height(buttonS*4+30).centerY(0).centerX(0)
-        label.chura.layout.width(260).height(50).centerX(0).top(100)
+    }
+    
+    override func initializeConstraints() {
+        
+        stackView.chura.layout
+            .top(label.anchor.bottom+40)
+            .width(buttonS*3+20)
+            .height(buttonS*4+30)
+            .centerX(0)
+        
+        label.chura.layout
+            .top(100).width(buttonS*3+20).height(50).centerX(0)
     }
     
     func update(active: Bool) {
         
         isUserInteractionEnabled = active
-        let alpha: CGFloat = active ? 1 : 0
+        let alpha: CGFloat = active ? 1 : 0.3
         numberButtons.forEach { $0.alpha = alpha }
         answerButton.alpha = alpha
         clearButton.alpha = alpha

@@ -23,7 +23,7 @@ class GameResultViewController: UIViewController {
     private let bag = DisposeBag()
 
     override func viewDidLoad() {
-        tableView.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
+        tableView.register(GameResultTableViewCell.self, forCellReuseIdentifier: "cell")
         tableView.dataSource = self
         
         replayButton.rx.tap
@@ -46,11 +46,8 @@ extension GameResultViewController: UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
-        
-        let result = GameManager.results[indexPath.row]
-        cell.textLabel?.text = " 正解 \(result.target), あなた \(result.answer)"
-        cell.contentView.backgroundColor = .white
+        let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath) as! GameResultTableViewCell
+        cell.configure(result: GameManager.results[indexPath.row])
         return cell
     }
 }

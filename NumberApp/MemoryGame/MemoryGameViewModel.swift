@@ -79,7 +79,7 @@ final class MemoryGameViewModel: MemoryGameViewModelType, MemoryGameViewModelInp
             } else {
                 
                 //入力された数字と問題の数字の違っている部分がハイライトされた文字列。
-                let attrText = hilightTowStringDiff(_currentAnswerString.value, with: _nextTargetString.value)
+                let attrText: NSAttributedString = .hilightTwoStringDiff(_currentAnswerString.value, with: _nextTargetString.value)
                 resultSubject.onNext(.incorrect(attrText))
             }
              GameManager.results.append((target: _nextTargetString.value, answer: _currentAnswerString.value))
@@ -111,22 +111,6 @@ final class MemoryGameViewModel: MemoryGameViewModelType, MemoryGameViewModelInp
     private var gameFinishTriger: PublishSubject<Void> = PublishSubject()
     private var bag = DisposeBag()
     private var targetStrings: [String]
-    
-    
-    //二つの文字列の差分をハイライトしたAttributedString
-    private func hilightTowStringDiff(_ target: String, with: String) -> NSAttributedString {
-
-        let lhd = target.map { String($0) }
-        let rhd = with.map { String($0) }
-        let attrText = NSMutableAttributedString(string: target)
-//        if answer.count != target.count { return } //起きる可能性はない。
-        for i in 0..<lhd.count {
-            if lhd[i] != rhd[i] {
-                attrText.addAttribute(.foregroundColor, value: UIColor.pink, range: NSMakeRange(i, 1))
-            }
-        }
-        return attrText
-    }
 }
 
 //⚠️ Reentrancy anomaly was detected.
@@ -141,3 +125,20 @@ final class MemoryGameViewModel: MemoryGameViewModelType, MemoryGameViewModelInp
 //
 //8文字
 
+
+extension NSAttributedString {
+    //二つの文字列の差分をハイライトしたAttributedString
+    static func hilightTwoStringDiff(_ target: String, with: String) -> NSAttributedString {
+        
+        let lhd = target.map { String($0) }
+        let rhd = with.map { String($0) }
+        let attrText = NSMutableAttributedString(string: target)
+        //        if answer.count != target.count { return } //起きる可能性はない。
+        for i in 0..<lhd.count {
+            if lhd[i] != rhd[i] {
+                attrText.addAttribute(.foregroundColor, value: UIColor.pink, range: NSMakeRange(i, 1))
+            }
+        }
+        return attrText
+    }
+}
