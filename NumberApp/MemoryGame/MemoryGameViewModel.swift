@@ -42,7 +42,7 @@ final class MemoryGameViewModel: MemoryGameViewModelType, MemoryGameViewModelInp
     func numberTapped(num: Int) {
         _inAnswerString.accept(_inAnswerString.value + "\(num)")
         if _inAnswerString.value.count >= GameManager.current.numberOfDigits {
-            inputs.updateState(to: .gudgeResult)
+            updateState(to: .gudgeResult)
         }
     }
     
@@ -119,40 +119,3 @@ final class MemoryGameViewModel: MemoryGameViewModelType, MemoryGameViewModelInp
     private var targetStrings: [String] = []
 }
 
-//⚠️ Reentrancy anomaly was detected.
-//    > Debugging: To debug this issue you can set a breakpoint in /Users/chuutatsu/xcode/NumberApp/Pods/RxSwift/RxSwift/Rx.swift:97 and observe the call stack.
-//> Problem: This behavior is breaking the observable sequence grammar. `next (error | completed)?`
-//This behavior breaks the grammar because there is overlapping between sequence events.
-//Observable sequence is trying to send an event before sending of previous event has finished.
-//> Interpretation: This could mean that there is some kind of unexpected cyclic dependency in your code,
-//or that the system is not behaving in the expected way.
-//> Remedy: If this is the expected behavior this message can be suppressed by adding `.observeOn(MainScheduler.asyncInstance)`
-//or by enqueing sequence events in some other way.
-//
-//8文字
-//
-//
-//        currentAnswerString
-//            .observeOn(MainScheduler.asyncInstance) //警告にあったので追加。
-//            .filter { $0.count >= targetNumberLength }
-//            .subscribe(onNext: { [weak self] _ in
-//                self?.inputs.updateState(to: .gudgeResult)
-//            }).disposed(by: bag)
-
-
-extension NSAttributedString {
-    //二つの文字列の差分をハイライトしたAttributedString
-    static func hilightTwoStringDiff(_ target: String, with: String) -> NSAttributedString {
-        
-        let lhd = target.map { String($0) }
-        let rhd = with.map { String($0) }
-        let attrText = NSMutableAttributedString(string: target)
-        //        if answer.count != target.count { return } //起きる可能性はない。
-        for i in 0..<lhd.count {
-            if lhd[i] != rhd[i] {
-                attrText.addAttribute(.foregroundColor, value: UIColor.pink, range: NSMakeRange(i, 1))
-            }
-        }
-        return attrText
-    }
-}

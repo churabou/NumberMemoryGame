@@ -8,16 +8,6 @@
 
 import UIKit
 
-extension UIColor {
-    static var pink: UIColor {
-        return UIColor(displayP3Red: 255/255, green: 192/255, blue: 203/255, alpha: 1.0)
-    }
-    
-    static var lightBlue: UIColor {
-        return UIColor.cyan.withAlphaComponent(0.9)
-    }
-}
-
 final class MemoryGameView: BaseView {
     
     private (set) var label = UILabel()

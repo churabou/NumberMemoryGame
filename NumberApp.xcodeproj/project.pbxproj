@@ -20,6 +20,7 @@
 		C978F0C920CCD746004397E3 /* MemoryGameViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C978F0C820CCD746004397E3 /* MemoryGameViewController.swift */; };
 		C978F0CC20CCDC1E004397E3 /* GameManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C978F0CB20CCDC1E004397E3 /* GameManager.swift */; };
 		C978F0CE20CCFB1C004397E3 /* GameResultView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C978F0CD20CCFB1C004397E3 /* GameResultView.swift */; };
+		C979F44720CEA5A400C591CA /* Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = C979F44620CEA5A400C591CA /* Extension.swift */; };
 		C9812E1820CAA30600318525 /* Layout.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9812E1720CAA30600318525 /* Layout.swift */; };
 		C9812E1A20CAACDD00318525 /* MemoryGameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9812E1920CAACDD00318525 /* MemoryGameView.swift */; };
 		C9812E1C20CB5BD500318525 /* MemoryGameViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9812E1B20CB5BD500318525 /* MemoryGameViewModel.swift */; };
@@ -64,6 +65,7 @@
 		C978F0C820CCD746004397E3 /* MemoryGameViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MemoryGameViewController.swift; sourceTree = "<group>"; };
 		C978F0CB20CCDC1E004397E3 /* GameManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameManager.swift; sourceTree = "<group>"; };
 		C978F0CD20CCFB1C004397E3 /* GameResultView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameResultView.swift; sourceTree = "<group>"; };
+		C979F44620CEA5A400C591CA /* Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extension.swift; sourceTree = "<group>"; };
 		C9812E1720CAA30600318525 /* Layout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Layout.swift; sourceTree = "<group>"; };
 		C9812E1920CAACDD00318525 /* MemoryGameView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryGameView.swift; sourceTree = "<group>"; };
 		C9812E1B20CB5BD500318525 /* MemoryGameViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryGameViewModel.swift; sourceTree = "<group>"; };
@@ -138,12 +140,11 @@
 			isa = PBXGroup;
 			children = (
 				C95F2E1520CA18F100D9AA28 /* AppDelegate.swift */,
-				C978F0C220CC3DFB004397E3 /* BaseView.swift */,
+				C979F44520CEA59300C591CA /* Common */,
 				C978F0CA20CCD751004397E3 /* MemoryGame */,
 				C978F0CF20CCFB26004397E3 /* GameResult */,
 				C978F0CB20CCDC1E004397E3 /* GameManager.swift */,
 				C978F0C620CCD720004397E3 /* StartViewController.swift */,
-				C9812E1720CAA30600318525 /* Layout.swift */,
 				C95F2E1920CA18F100D9AA28 /* Main.storyboard */,
 				C95F2E1C20CA18F400D9AA28 /* Assets.xcassets */,
 				C95F2E1E20CA18F400D9AA28 /* LaunchScreen.storyboard */,
@@ -187,6 +188,16 @@
 				C978F0CD20CCFB1C004397E3 /* GameResultView.swift */,
 			);
 			path = GameResult;
+			sourceTree = "<group>";
+		};
+		C979F44520CEA59300C591CA /* Common */ = {
+			isa = PBXGroup;
+			children = (
+				C978F0C220CC3DFB004397E3 /* BaseView.swift */,
+				C979F44620CEA5A400C591CA /* Extension.swift */,
+				C9812E1720CAA30600318525 /* Layout.swift */,
+			);
+			path = Common;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -367,6 +378,7 @@
 				C978F0CC20CCDC1E004397E3 /* GameManager.swift in Sources */,
 				C9812E1820CAA30600318525 /* Layout.swift in Sources */,
 				C9812E1C20CB5BD500318525 /* MemoryGameViewModel.swift in Sources */,
+				C979F44720CEA5A400C591CA /* Extension.swift in Sources */,
 				C978F0C320CC3DFB004397E3 /* BaseView.swift in Sources */,
 				C978F0CE20CCFB1C004397E3 /* GameResultView.swift in Sources */,
 				C978F0C520CCBBB8004397E3 /* GameResultViewController.swift in Sources */,

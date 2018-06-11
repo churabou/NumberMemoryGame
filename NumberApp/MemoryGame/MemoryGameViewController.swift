@@ -29,6 +29,7 @@ class MemoryGameViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        //outputs
         viewModel.outputs
             .inAnswerString
             .bind(to: label.rx.text)
@@ -41,7 +42,7 @@ class MemoryGameViewController: UIViewController {
         
         viewModel.outputs
             .result
-            .bind(to: showResultThenRequest)
+            .bind(to: showResultThenNext)
             .disposed(by: bag)
         
         viewModel.outputs
@@ -54,6 +55,7 @@ class MemoryGameViewController: UIViewController {
             .bind(to: showGameResultVC)
             .disposed(by: bag)
         
+        //inputs
         numberButtons.forEach { button in
             button.rx.tap.subscribe(onNext: { [weak self] _ in
                 self?.viewModel.inputs.numberTapped(num: button.tag)
@@ -71,6 +73,7 @@ class MemoryGameViewController: UIViewController {
         viewModel.inputs.viewDidLoad()
     }
     
+    //問題の数字を表示する。1秒経過したら入力を受け付ける。
     private var showTargetNumberForWhile: AnyObserver<String> {
         return Binder(self) { `self`, target in
             self.label.text = target
@@ -85,7 +88,7 @@ class MemoryGameViewController: UIViewController {
     }
     
     //正解ならCorrect、不正解なら間違ったところをハイライトして表示する。1秒後に次の問題を表示する
-    private var showResultThenRequest: AnyObserver<GudgeResult> {
+    private var showResultThenNext: AnyObserver<GudgeResult> {
         return Binder(self) { `self`, result in
             switch result {
             case .currect: //表示非表示、をして
@@ -101,10 +104,6 @@ class MemoryGameViewController: UIViewController {
                 }).disposed(by: self.bag)
             }.asObserver()
     }
-
-}
-
-extension MemoryGameViewController {
     
     private var showGameResultVC: AnyObserver<Void> {
         return Binder(self) { controller, _ in
