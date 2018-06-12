@@ -16,7 +16,6 @@ protocol MemoryGameViewModelInputs {
     func numberTapped(num: Int)
     func passButtonTapped()
     func clearButtonTapped()
-    func updateState(to: MemoryGameState)
     func viewDidLoad()
 }
 
@@ -45,6 +44,7 @@ final class MemoryGameViewModel: MemoryGameViewModelType, MemoryGameViewModelInp
             gudgeResultThenNext()
         }
     }
+    
     func passButtonTapped() { //強制的に判定に
         gudgeResultThenNext()
     }
@@ -53,49 +53,6 @@ final class MemoryGameViewModel: MemoryGameViewModelType, MemoryGameViewModelInp
         let answer = _inAnswerString.value
         if !answer.isEmpty {
             _inAnswerString.accept(String(answer.prefix(answer.count-1)))
-        }
-    }
-    
-    private func gudgeResultThenNext() {
-        
-        //判定する -> 1秒後に次の問題を見せる -> さらに1秒後に入力を受け付ける。
-        Observable<MemoryGameState>.concat(.just(.gudgeResult),
-                                           Observable.just(.showTarget).delay(1, scheduler: MainScheduler.instance),
-                                           Observable.just(.trySolving).delay(1, scheduler: MainScheduler.instance)
-            )
-            .subscribe(onNext: { [weak self] in self?.gameSubject.onNext($0) })
-            .disposed(by: bag)
-    }
-    
-    func updateState(to: MemoryGameState) {
-        switch to {
-        case .showTarget:
-            if let target = targetStrings.popLast() {
-                _targetString.accept(target)
-            } else {
-                //ゲーム終了
-                gameFinishTriger.onNext(())
-            }
-        case .trySolving:
-            _inAnswerString.accept("")
-        case .gudgeResult:
-            
-            //パス
-            if _inAnswerString.value.count < _targetString.value.count {
-                resultSubject.onNext(.incorrect(NSAttributedString(string: "pass")))
-                GameManager.current.results.append((target: _targetString.value, answer: "pass"))
-                return
-            }
-            //判定
-            if _inAnswerString.value == _targetString.value {
-                resultSubject.onNext(.currect)
-            } else {
-                //入力された数字と問題の数字の違っている部分がハイライトされた文字列。
-                let attrText: NSAttributedString = .hilightTwoStringDiff(_inAnswerString.value, with: _targetString.value)
-                resultSubject.onNext(.incorrect(attrText))
-            }
-            //結果を保存。
-             GameManager.current.results.append((target: _targetString.value, answer: _inAnswerString.value))
         }
     }
     
@@ -127,11 +84,16 @@ final class MemoryGameViewModel: MemoryGameViewModelType, MemoryGameViewModelInp
         
         gameState = gameSubject.asObserver().share(replay: 1)
         //stateに応じて画面タップを制限する。
-        gameState.map { $0 == .trySolving }.bind(to: tapEnableSubject).disposed(by: bag)
+        gameState
+            .map { $0 == .trySolving }
+            .bind(to: tapEnableSubject)
+            .disposed(by: bag)
         
-        gameState.subscribe(onNext: { [weak self] state in
-            self?.updateState(to: state)
-        }).disposed(by: bag)
+        gameState
+            .subscribe(onNext: { [weak self] state in
+                self?.updateState(to: state)
+            })
+            .disposed(by: bag)
     }
     
     private var _targetString: BehaviorRelay<String> = BehaviorRelay(value: "")
@@ -143,5 +105,53 @@ final class MemoryGameViewModel: MemoryGameViewModelType, MemoryGameViewModelInp
     private var targetStrings: [String] = []
     private let gameSubject = PublishSubject<MemoryGameState>()
     private let gameState: Observable<MemoryGameState>
+    
+    private func gudgeResultThenNext() {
+        
+        if targetStrings.isEmpty {
+            gameSubject.onNext(.gudgeResult)
+            Observable<Int>.interval(1, scheduler: MainScheduler.instance)
+                .take(1)
+                .map { _ in }
+                .bind(to: gameFinishTriger)
+                .disposed(by: bag)
+        } else {
+            //判定する -> 1秒後に次の問題を見せる -> さらに1秒後に入力を受け付ける。
+            Observable<MemoryGameState>.concat(.just(.gudgeResult),
+                                               Observable.just(.showTarget).delay(1, scheduler: MainScheduler.instance),
+                                               Observable.just(.trySolving).delay(1, scheduler: MainScheduler.instance)
+                )
+                .subscribe(onNext: { [weak self] in self?.gameSubject.onNext($0) })
+                .disposed(by: bag)
+        }
+    }
+    
+    private func updateState(to: MemoryGameState) {
+        switch to {
+        case .showTarget:
+            if let target = targetStrings.popLast() { //ここは強制あんラップでも良い。
+                _targetString.accept(target)
+            }
+        case .trySolving:
+            _inAnswerString.accept("")
+        case .gudgeResult:
+            //パス
+            if _inAnswerString.value.count < _targetString.value.count {
+                resultSubject.onNext(.incorrect(NSAttributedString(string: "pass")))
+                GameManager.current.results.append((target: _targetString.value, answer: "pass"))
+                return
+            }
+            //判定
+            if _inAnswerString.value == _targetString.value {
+                resultSubject.onNext(.currect)
+            } else {
+                //入力された数字と問題の数字の違っている部分がハイライトされた文字列。
+                let attrText: NSAttributedString = .hilightTwoStringDiff(_inAnswerString.value, with: _targetString.value)
+                resultSubject.onNext(.incorrect(attrText))
+            }
+            //結果を保存。
+            GameManager.current.results.append((target: _targetString.value, answer: _inAnswerString.value))
+        }
+    }
 }
 

@@ -73,20 +73,6 @@ class MemoryGameViewController: UIViewController {
         viewModel.inputs.viewDidLoad()
     }
     
-    //問題の数字を表示する。1秒経過したら入力を受け付ける。
-    private var showTargetNumberForWhile: AnyObserver<String> {
-        return Binder(self) { `self`, target in
-            self.label.text = target
-            //1秒後に処理をしたい。
-            Observable<Int>.interval(1.0, scheduler: MainScheduler.instance)
-                .take(1)
-                .subscribe(onNext: { _ in
-                    self.viewModel.inputs.updateState(to: .trySolving)
-                }).disposed(by: self.bag)
-            
-        }.asObserver()
-    }
-    
     //正解ならCorrect、不正解なら間違ったところをハイライトして表示する。1秒後に次の問題を表示する
     private var showResult: AnyObserver<GudgeResult> {
         return Binder(self) { `self`, result in
