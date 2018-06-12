@@ -42,15 +42,11 @@ final class MemoryGameViewModel: MemoryGameViewModelType, MemoryGameViewModelInp
     func numberTapped(num: Int) {
         _inAnswerString.accept(_inAnswerString.value + "\(num)")
         if _inAnswerString.value.count >= GameManager.current.numberOfDigits {
-            updateState(to: .gudgeResult)
+            gudgeResultThenNext()
         }
     }
-    
-    func passButtonTapped() {
-        //判定
-        tapEnableSubject.onNext(false)
-        resultSubject.onNext(.incorrect(NSAttributedString(string: "pass")))
-        GameManager.current.results.append((target: _inAnswerString.value, answer: "pass"))
+    func passButtonTapped() { //強制的に判定に
+        gudgeResultThenNext()
     }
     
     func clearButtonTapped() {
@@ -60,23 +56,37 @@ final class MemoryGameViewModel: MemoryGameViewModelType, MemoryGameViewModelInp
         }
     }
     
+    private func gudgeResultThenNext() {
+        
+        //判定する -> 1秒後に次の問題を見せる -> さらに1秒後に入力を受け付ける。
+        Observable<MemoryGameState>.concat(.just(.gudgeResult),
+                                           Observable.just(.showTarget).delay(1, scheduler: MainScheduler.instance),
+                                           Observable.just(.trySolving).delay(1, scheduler: MainScheduler.instance)
+            )
+            .subscribe(onNext: { [weak self] in self?.gameSubject.onNext($0) })
+            .disposed(by: bag)
+    }
+    
     func updateState(to: MemoryGameState) {
         switch to {
         case .showTarget:
-            
             if let target = targetStrings.popLast() {
-                tapEnableSubject.onNext(false)
                 _targetString.accept(target)
             } else {
                 //ゲーム終了
                 gameFinishTriger.onNext(())
             }
         case .trySolving:
-            tapEnableSubject.onNext(true)
             _inAnswerString.accept("")
         case .gudgeResult:
+            
+            //パス
+            if _inAnswerString.value.count < _targetString.value.count {
+                resultSubject.onNext(.incorrect(NSAttributedString(string: "pass")))
+                GameManager.current.results.append((target: _targetString.value, answer: "pass"))
+                return
+            }
             //判定
-            tapEnableSubject.onNext(false)
             if _inAnswerString.value == _targetString.value {
                 resultSubject.onNext(.currect)
             } else {
@@ -92,7 +102,13 @@ final class MemoryGameViewModel: MemoryGameViewModelType, MemoryGameViewModelInp
     func viewDidLoad() {
         GameManager.startNewGame()
         targetStrings = GameManager.current.newTargets
-        updateState(to: .showTarget)
+        //問題を見せる -> 1秒後に回答を受け付けるイベントを流す。
+        Observable<MemoryGameState>.concat(.just(.showTarget),
+                                           Observable.just(.trySolving).delay(1, scheduler: MainScheduler.instance))
+            .subscribe(onNext: { state in
+                self.gameSubject.onNext(state)
+            })
+            .disposed(by: bag)
     }
     
     //Outputs
@@ -108,6 +124,14 @@ final class MemoryGameViewModel: MemoryGameViewModelType, MemoryGameViewModelInp
         result = resultSubject.asObservable()
         tapEnabled = tapEnableSubject.asObservable()
         gameFinished = gameFinishTriger.asObservable()
+        
+        gameState = gameSubject.asObserver().share(replay: 1)
+        //stateに応じて画面タップを制限する。
+        gameState.map { $0 == .trySolving }.bind(to: tapEnableSubject).disposed(by: bag)
+        
+        gameState.subscribe(onNext: { [weak self] state in
+            self?.updateState(to: state)
+        }).disposed(by: bag)
     }
     
     private var _targetString: BehaviorRelay<String> = BehaviorRelay(value: "")
@@ -117,5 +141,7 @@ final class MemoryGameViewModel: MemoryGameViewModelType, MemoryGameViewModelInp
     private var gameFinishTriger: PublishSubject<Void> = PublishSubject()
     private var bag = DisposeBag()
     private var targetStrings: [String] = []
+    private let gameSubject = PublishSubject<MemoryGameState>()
+    private let gameState: Observable<MemoryGameState>
 }
 

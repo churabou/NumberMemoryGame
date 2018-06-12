@@ -37,12 +37,12 @@ class MemoryGameViewController: UIViewController {
         
         viewModel.outputs
             .targetString
-            .bind(to: showTargetNumberForWhile)
+            .bind(to: label.rx.text)
             .disposed(by: bag)
         
         viewModel.outputs
             .result
-            .bind(to: showResultThenNext)
+            .bind(to: showResult)
             .disposed(by: bag)
         
         viewModel.outputs
@@ -88,7 +88,7 @@ class MemoryGameViewController: UIViewController {
     }
     
     //正解ならCorrect、不正解なら間違ったところをハイライトして表示する。1秒後に次の問題を表示する
-    private var showResultThenNext: AnyObserver<GudgeResult> {
+    private var showResult: AnyObserver<GudgeResult> {
         return Binder(self) { `self`, result in
             switch result {
             case .currect: //表示非表示、をして
@@ -96,13 +96,7 @@ class MemoryGameViewController: UIViewController {
             case .incorrect(let hilightedText):
                 self.label.attributedText = hilightedText
             }
-            //1秒後に処理をしたい。
-            Observable<Int>.interval(1.0, scheduler: MainScheduler.instance)
-                .take(1)
-                .subscribe(onNext: { [weak self] _ in
-                    self?.viewModel.inputs.updateState(to: .showTarget)
-                }).disposed(by: self.bag)
-            }.asObserver()
+        }.asObserver()
     }
     
     private var showGameResultVC: AnyObserver<Void> {
