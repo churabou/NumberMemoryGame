@@ -24,6 +24,22 @@ class StartViewController: UIViewController {
         view.backgroundColor = .lightBlue
         view.addSubview(label)
         label.chura.layout.width(300).height(300).centerX(0).centerY(0)
+        
+        
+//        let menuButton = UIButton()
+//        menuButton.backgroundColor = .white
+//        menuButton.layer.cornerRadius = 30
+//        view.addSubview(menuButton)
+//        
+//        menuButton.chura.layout.width(60).height(60).right(-20).bottom(-20)
+//        
+//        menuButton.rx.tap.asDriver().drive(onNext: { _ in
+//            
+//            let c = SettingView()
+//            c.modalTransitionStyle = .crossDissolve
+//            c.modalPresentationStyle = .overCurrentContext
+//            self.present(c, animated: true, completion: nil)
+//        }).disposed(by: bag)
     }
     
     var isTapped = false
@@ -48,3 +64,43 @@ class StartViewController: UIViewController {
             }).disposed(by: bag)
     }
 }
+
+
+
+class SettingView: UIViewController {
+    
+    private let bag = DisposeBag()
+    
+    override func viewDidLoad() {
+        
+        view.backgroundColor = .clear
+        
+        let contentView = UIStackView()
+        contentView.distribution = .fillEqually
+        contentView.axis = .vertical
+        view.addSubview(contentView)
+        contentView.chura.layout.width(300).height(300).centerX(0).centerY(0)
+
+        ["問題数", "桁数", "表示時間"].forEach { target in
+            
+            let wrapperView = UIView()
+            wrapperView.backgroundColor = .white
+            let label = UILabel()
+            label.textColor = UIColor.black
+            label.text = ""
+            let slider = UISlider()
+            wrapperView.addSubview(label)
+            wrapperView.addSubview(slider)
+            contentView.addArrangedSubview(wrapperView)
+            
+            slider.rx.value
+                .map { "\(target): \($0)" }
+                .bind(to: label.rx.text)
+                .disposed(by: bag)
+            
+            label.chura.layout.left(50).right(-50).top(0).height(50)
+            slider.chura.layout.left(50).right(-50).bottom(0).height(50)
+        }
+    }
+}
+

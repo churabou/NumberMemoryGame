@@ -18,7 +18,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Override point for customization after application launch.
         
         window = UIWindow()
-        window?.rootViewController = MemoryGameViewController()//StartViewController()
+        window?.rootViewController = StartViewController()
         window?.makeKeyAndVisible()
         return true
     }
