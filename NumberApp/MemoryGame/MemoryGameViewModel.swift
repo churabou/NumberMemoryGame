@@ -62,8 +62,8 @@ final class MemoryGameViewModel: MemoryGameViewModelType, MemoryGameViewModelInp
         //問題を見せる -> 1秒後に回答を受け付けるイベントを流す。
         Observable<MemoryGameState>.concat(.just(.showTarget),
                                            Observable.just(.trySolving).delay(1, scheduler: MainScheduler.instance))
-            .subscribe(onNext: { state in
-                self.gameSubject.onNext(state)
+            .subscribe(onNext: { [weak self] state in
+                self?.gameStateTriger.onNext(state)
             })
             .disposed(by: bag)
     }
@@ -78,15 +78,15 @@ final class MemoryGameViewModel: MemoryGameViewModelType, MemoryGameViewModelInp
     init() {
         targetString = _targetString.asObservable()
         inAnswerString = _inAnswerString.asObservable().share(replay: 1)
-        result = resultSubject.asObservable()
-        tapEnabled = tapEnableSubject.asObservable()
+        result = resultTriger.asObservable()
+        tapEnabled = tapEnableTriger.asObservable()
         gameFinished = gameFinishTriger.asObservable()
         
-        gameState = gameSubject.asObserver().share(replay: 1)
+        gameState = gameStateTriger.asObserver().share(replay: 1)
         //stateに応じて画面タップを制限する。
         gameState
             .map { $0 == .trySolving }
-            .bind(to: tapEnableSubject)
+            .bind(to: tapEnableTriger)
             .disposed(by: bag)
         
         gameState
@@ -98,18 +98,18 @@ final class MemoryGameViewModel: MemoryGameViewModelType, MemoryGameViewModelInp
     
     private var _targetString: BehaviorRelay<String> = BehaviorRelay(value: "")
     private var _inAnswerString: BehaviorRelay<String> = BehaviorRelay(value: "")
-    private var resultSubject: PublishSubject<GudgeResult> = PublishSubject()
-    private var tapEnableSubject: PublishSubject<Bool> = PublishSubject()
+    private var resultTriger: PublishSubject<GudgeResult> = PublishSubject()
+    private var tapEnableTriger: PublishSubject<Bool> = PublishSubject()
     private var gameFinishTriger: PublishSubject<Void> = PublishSubject()
     private var bag = DisposeBag()
     private var targetStrings: [String] = []
-    private let gameSubject = PublishSubject<MemoryGameState>()
+    private let gameStateTriger = PublishSubject<MemoryGameState>()
     private let gameState: Observable<MemoryGameState>
     
     private func gudgeResultThenNext() {
         
         if targetStrings.isEmpty {
-            gameSubject.onNext(.gudgeResult)
+            gameStateTriger.onNext(.gudgeResult)
             Observable<Int>.interval(1, scheduler: MainScheduler.instance)
                 .take(1)
                 .map { _ in }
@@ -121,7 +121,9 @@ final class MemoryGameViewModel: MemoryGameViewModelType, MemoryGameViewModelInp
                                                Observable.just(.showTarget).delay(1, scheduler: MainScheduler.instance),
                                                Observable.just(.trySolving).delay(1, scheduler: MainScheduler.instance)
                 )
-                .subscribe(onNext: { [weak self] in self?.gameSubject.onNext($0) })
+                .subscribe(onNext: { [weak self] state in
+                    self?.gameStateTriger.onNext(state)
+                })
                 .disposed(by: bag)
         }
     }
@@ -137,17 +139,17 @@ final class MemoryGameViewModel: MemoryGameViewModelType, MemoryGameViewModelInp
         case .gudgeResult:
             //パス
             if _inAnswerString.value.count < _targetString.value.count {
-                resultSubject.onNext(.incorrect(NSAttributedString(string: "pass")))
+                resultTriger.onNext(.incorrect(NSAttributedString(string: "pass")))
                 GameManager.current.results.append((target: _targetString.value, answer: "pass"))
                 return
             }
             //判定
             if _inAnswerString.value == _targetString.value {
-                resultSubject.onNext(.currect)
+                resultTriger.onNext(.currect)
             } else {
                 //入力された数字と問題の数字の違っている部分がハイライトされた文字列。
                 let attrText: NSAttributedString = .hilightTwoStringDiff(_inAnswerString.value, with: _targetString.value)
-                resultSubject.onNext(.incorrect(attrText))
+                resultTriger.onNext(.incorrect(attrText))
             }
             //結果を保存。
             GameManager.current.results.append((target: _targetString.value, answer: _inAnswerString.value))
